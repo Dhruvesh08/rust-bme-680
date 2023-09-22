@@ -1,57 +1,42 @@
-#![no_std]
+extern crate bme680;
+extern crate embedded_hal;
+// Note that you'll have to import your board crates types corresponding to
+// Delay and I2cdev.
 
 use bme680::*;
-use core::result;
-use core::time::Duration;
-use embedded_hal::blocking::delay::DelayMs;
 use embedded_hal::blocking::i2c;
-use linux_embedded_hal as hal;
-use linux_embedded_hal::Delay;
-use log::info;
+use hal::*;
+use std::result;
+use std::time::Duration;
+use std::thread::sleep;
 
-fn main(
-) -> result::Result<(), Error<<hal::I2cdev as i2c::Read>::Error, <hal::I2cdev as i2c::Write>::Error>>
+
+fn main() -> result::Result<(), Error<<hal::I2cdev as i2c::Read>::Error, <hal::I2cdev as i2c::Write>::Error>>
 {
-    env_logger::init();
-
-    let i2c = hal::I2cdev::new("/dev/i2c-1").unwrap();
-    let mut delayer = Delay {};
-
+    // Initialize device
+    let i2c = I2cdev {};        // Your I2C device construction will look different, perhaps using I2cdev::new(..)
+    let mut delayer = Delay {}; // Your Delay construction will look different, perhaps using Delay::new(..)
     let mut dev = Bme680::init(i2c, &mut delayer, I2CAddress::Primary)?;
-    let mut delay = Delay {};
-
     let settings = SettingsBuilder::new()
         .with_humidity_oversampling(OversamplingSetting::OS2x)
         .with_pressure_oversampling(OversamplingSetting::OS4x)
         .with_temperature_oversampling(OversamplingSetting::OS8x)
         .with_temperature_filter(IIRFilterSize::Size3)
         .with_gas_measurement(Duration::from_millis(1500), 320, 25)
-        .with_temperature_offset(-2.2)
         .with_run_gas(true)
         .build();
-
-    let profile_dur = dev.get_profile_dur(&settings.0)?;
-    info!("Profile duration {:?}", profile_dur);
-    info!("Setting sensor settings");
     dev.set_sensor_settings(&mut delayer, settings)?;
-    info!("Setting forced power modes");
+    let profile_duration = dev.get_profile_dur(&settings.0)?;
+
+    // Read sensor data
     dev.set_sensor_mode(&mut delayer, PowerMode::ForcedMode)?;
+    sleep(profile_duration);
+    let (data, _state) = dev.get_sensor_data(&mut delayer)?;
 
-    let sensor_settings = dev.get_sensor_settings(settings.1);
-    info!("Sensor settings: {:?}", sensor_settings);
+    println!("Temperature {}°C", data.temperature_celsius());
+    println!("Pressure {}hPa", data.pressure_hpa());
+    println!("Humidity {}%", data.humidity_percent());
+    println!("Gas Resistence {}Ω", data.gas_resistance_ohm());
 
-    loop {
-        delay.delay_ms(5000u32);
-        let power_mode = dev.get_sensor_mode();
-        info!("Sensor power mode: {:?}", power_mode);
-        info!("Setting forced power modes");
-        dev.set_sensor_mode(&mut delayer, PowerMode::ForcedMode)?;
-        info!("Retrieving sensor data");
-        let (data, _state) = dev.get_sensor_data(&mut delayer)?;
-        info!("Sensor Data {:?}", data);
-        info!("Temperature {}°C", data.temperature_celsius());
-        info!("Pressure {}hPa", data.pressure_hpa());
-        info!("Humidity {}%", data.humidity_percent());
-        info!("Gas Resistence {}Ω", data.gas_resistance_ohm());
-    }
+    Ok(())
 }

@@ -8,10 +8,10 @@ inherit cargo
 # how to get rust-bme-680 could be as easy as but default to a git checkout:
 # SRC_URI += "crate://crates.io/rust-bme-680/0.1.0"
 SRC_URI += "git://github.com/Dhruvesh08/rust-bme-680.git;protocol=https;nobranch=1;branch=main"
-SRCREV = "f0f1bab4d6f624765540842117e274fd656ced6b"
+SRCREV = "e37481b991c2a406ba137d6b341d18e131549be8"
 S = "${WORKDIR}/git"
 CARGO_SRC_DIR = ""
-PV:append = ".AUTOINC+f0f1bab4d6"
+PV:append = ".AUTOINC+e37481b991"
 
 # please note if you have entries that do not begin with crate://
 # you must change them to how that package can be fetched
@@ -24,12 +24,14 @@ SRC_URI += " \
     crate://crates.io/backtrace/0.3.69 \
     crate://crates.io/base64/0.21.4 \
     crate://crates.io/bitflags/1.3.2 \
+    crate://crates.io/bme680/0.6.0 \
     crate://crates.io/bumpalo/3.14.0 \
     crate://crates.io/byteorder/1.4.3 \
     crate://crates.io/bytes/1.5.0 \
     crate://crates.io/cast/0.3.0 \
     crate://crates.io/cc/1.0.83 \
     crate://crates.io/cfg-if/1.0.0 \
+    crate://crates.io/embedded-hal/0.2.7 \
     crate://crates.io/embedded-hal/1.0.0-alpha.5 \
     crate://crates.io/encoding_rs/0.8.33 \
     crate://crates.io/env_logger/0.9.3 \
@@ -74,6 +76,7 @@ SRC_URI += " \
     crate://crates.io/mime/0.3.17 \
     crate://crates.io/miniz_oxide/0.7.1 \
     crate://crates.io/mio/0.8.8 \
+    crate://crates.io/nb/0.1.3 \
     crate://crates.io/nb/1.1.0 \
     crate://crates.io/nix/0.23.2 \
     crate://crates.io/num_cpus/1.16.0 \
@@ -131,6 +134,7 @@ SRC_URI += " \
     crate://crates.io/unicode-normalization/0.1.22 \
     crate://crates.io/untrusted/0.7.1 \
     crate://crates.io/url/2.4.1 \
+    crate://crates.io/void/1.0.2 \
     crate://crates.io/want/0.3.1 \
     crate://crates.io/wasi/0.11.0+wasi-snapshot-preview1 \
     crate://crates.io/wasm-bindgen-backend/0.2.87 \
